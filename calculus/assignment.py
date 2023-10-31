@@ -64,18 +64,18 @@ if __name__ == "__main__":
     max_iterations = 1000
     tolerance = 1e-6
 
-    alpha_values = [0.1, 0.5, 1]
-    init_values = [-4, -2, 0, 2, 4]
+    alpha_values = [0.01, 0.1, 1.0]
+    init_values = [-5.0, -3.0, -1.0, 1.0, 3.0]
     num_iters = 50
     strategy = ['constant', 'invscaling', 'adaptive']
 
     for s in strategy:
-        fig, axs = plt.subplots(len(alpha_values), len(init_values))
+        fig, axs = plt.subplots(len(alpha_values), len(init_values), figsize=(15, 12))
         for i, alpha in enumerate(alpha_values):
             for j, x_init in enumerate(init_values):
                 x_history, y_history = gradient_descent(x_init, alpha, num_iters, s)
                 axs[i, j].plot(x_history, y_history, 'o-', color='red')
-                axs[i, j].set_title(f'strategy={s}, alpha={alpha}, x_init={x_init}')
+                axs[i, j].set_title(f's={s}, a={alpha}, x0={x_init}')
                 axs[i, j].set_xlabel('x')
                 axs[i, j].set_ylabel('f(x)')
 
