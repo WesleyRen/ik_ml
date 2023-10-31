@@ -10,44 +10,47 @@ def d(x):
     return 2 * x - 4
 
 
-def gradient_descent(learning_rate_input, max_iterations_input, tolerance_input):
+def gradient_descent(x_ini, learning_rate_input, max_iterations_input, lr_strategy='constant'):
+    """
+    :param x_ini:
+    :param learning_rate_input:
+    :param max_iterations_input:
+    :param tolerance_input:
+    :param lr_strategy: learning rate strategy.
+    :return:
+    """
     # Initialize a starting point
-    x = 0.0
-    alpha = learning_rate_input
+    x = x_ini
+    local_alpha = learning_rate_input
 
-    x_history = [x]
-    y_history = [f(x)]
+    x_hist = [x]
+    y_hist = [f(x)]
+    new_alpha = local_alpha
+    t = 0
 
-    for iteration in range(max_iterations_input):
+    for i in range(max_iterations_input):
         # Calculate the gradient of the function with respect to x
         gradient = d(x)
-
-        current_value = f(x)
-        x_history.append(x)
-        y_history.append(current_value)
-
-        # Update x using the gradient and learning rate
-        x -= alpha * gradient
-
-        # Calculate the new function value
-        new_value = f(x)
-
-        # Check if the change in value is smaller than the tolerance
-        if abs(current_value - new_value) < tolerance_input:
-            print(f"Minimum found at x = {x} (iteration {iteration + 1})")
-            break
-
-    else:
-        print("Maximum iterations reached. Minimum might not be found.")
-
-    plot(x_history, y_history)
+        if lr_strategy == 'constant':
+            new_alpha = local_alpha
+        elif lr_strategy == 'invscaling':
+            t += 1
+            new_alpha = local_alpha / np.sqrt(t)
+        elif lr_strategy == 'adaptive':
+            # Check the sign of the gradient to determine overshooting
+            if i > 0 and np.sign(y_hist[-1] - y_hist[-2]) != np.sign(gradient):
+                new_alpha /= 5
+        x = x - new_alpha * gradient
+        x_hist.append(x)
+        y_hist.append(f(x_hist[-1]))
+    return x_hist, y_hist
 
 
-def plot(x_history, y_history):
+def plot(x_hist, y_hist):
     x_values = np.linspace(-2, 6, 400)
     y_values = f(x_values)
     plt.plot(x_values, y_values, label='f(x) = x^2 - 4x + 2')
-    plt.scatter(x_history, y_history, c='red', label='Gradient Descent Path')
+    plt.scatter(x_hist, y_hist, c='red', label='Gradient Descent Path')
     plt.xlabel('x')
     plt.ylabel('f(x)')
     plt.legend()
@@ -57,8 +60,24 @@ def plot(x_history, y_history):
 
 
 if __name__ == "__main__":
-    learning_rate = 0.1
+    learning_rate = 0.25
     max_iterations = 1000
     tolerance = 1e-6
 
-    gradient_descent(learning_rate, max_iterations, tolerance)
+    alpha_values = [0.1, 0.5, 1]
+    init_values = [-4, -2, 0, 2, 4]
+    num_iters = 50
+    strategy = ['constant', 'invscaling', 'adaptive']
+
+    for s in strategy:
+        fig, axs = plt.subplots(len(alpha_values), len(init_values))
+        for i, alpha in enumerate(alpha_values):
+            for j, x_init in enumerate(init_values):
+                x_history, y_history = gradient_descent(x_init, alpha, num_iters, s)
+                axs[i, j].plot(x_history, y_history, 'o-', color='red')
+                axs[i, j].set_title(f'strategy={s}, alpha={alpha}, x_init={x_init}')
+                axs[i, j].set_xlabel('x')
+                axs[i, j].set_ylabel('f(x)')
+
+        plt.tight_layout()
+        plt.show()
