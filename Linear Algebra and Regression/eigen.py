@@ -12,7 +12,8 @@ def calculate_eigenvalues_and_eigenvectors(matrix):
         eigenvectors = eigenvectors[:, sorted_indices]
 
         return eigenvalues, eigenvectors
-    except Exception as e:
+    except np.linalg.LinAlgError as e:
+        print(f"Eigenvalue computation failed. {e}")
         return None
 
 
@@ -22,13 +23,13 @@ if __name__ == "__main__":
     A = np.array([[4, -2],
                   [1, 1]])
 
-    eigenvalues, eigenvectors = calculate_eigenvalues_and_eigenvectors(A)
+    values, vectors = calculate_eigenvalues_and_eigenvectors(A)
 
-    if eigenvalues is not None:
-        print("Eigenvalues:", eigenvalues)
+    if values is not None:
+        print("Eigenvalues:", values)
         print("Eigenvectors:")
-        for i in range(len(eigenvalues)):
+        for i in range(len(values)):
             print("Eigenvalue {}:".format(i + 1))
-            print(eigenvectors[:, i])
+            print(vectors[:, i])
     else:
         print("Error: Unable to calculate eigenvalues and eigenvectors.")
